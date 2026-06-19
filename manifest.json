@@ -1,0 +1,21 @@
+[
+  {
+    "guid": "d7a3f1c2-4b5e-6d7f-8e9a-0b1c2d3e4f50",
+    "name": "Plex Directory Support",
+    "description": "Reads Plex-style provider ID tokens from folder and file names and injects them as Jellyfin provider IDs.",
+    "overview": "Adds support for Plex-style {tmdb-...}, {tvdb-...}, and {imdb-...} tokens.",
+    "owner": "xstasy",
+    "category": "Metadata",
+    "imageUrl": "https://raw.githubusercontent.com/xstasy/Jellyfin.Plugin.PlexDirectorySupport/refs/heads/main/Jellyfin.Plugin.PlexDirectorySupport/plex.png",
+    "versions": [
+      {
+        "version": "1.0.5.0",
+        "changelog": "Initial release",
+        "targetAbi": "10.11.11.0",
+        "sourceUrl": "https://github.com/xstasy/Jellyfin.Plugin.PlexDirectorySupport/releases/download/1.0.5.0/PlexDirectorySupport_1.0.5.0.zip",
+        "checksum": "16BBF6FCF86B43B7FEA927C9A39E707F2BF02EF76E884FEA1AB7DBBB59C99546",
+        "timestamp": "2026-06-19T00:00:00Z"
+      }
+    ]
+  }
+]
