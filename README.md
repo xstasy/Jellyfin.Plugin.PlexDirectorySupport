@@ -2,6 +2,17 @@
 
 A Jellyfin plugin that reads **Plex-style provider ID tokens** from folder and file names and injects them into Jellyfin's own provider ID store — so you can run Plex and Jellyfin against the same media library **without renaming anything**.
 
+## Install from repository
+
+In Jellyfin, go to **Dashboard → Plugins → Repositories** and add:
+
+| Field | Value |
+|-------|-------|
+| Repository name | `X's Plugins` |
+| Repository URL | `https://github.com/xstasy/Jellyfin.Plugin.PlexDirectorySupport/raw/refs/heads/main/manifest.json` |
+
+Save the repository, then install **Plex Directory Support** from the plugin catalog and restart Jellyfin.
+
 ## What it does
 
 Plex embeds provider IDs in curly braces, e.g.:
