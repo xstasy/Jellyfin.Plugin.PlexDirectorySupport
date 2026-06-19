@@ -1,0 +1,136 @@
+<div id="plexDirectorySupportConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-button,emby-checkbox">
+    <div data-role="content">
+        <div class="content-primary">
+            <h1>Plex Directory Support</h1>
+
+            <form class="plexDirectorySupportConfigForm">
+                <div class="verticalSection">
+                    <h2>Settings</h2>
+
+                    <label class="checkboxContainer">
+                        <input is="emby-checkbox" type="checkbox" class="chkOverwriteExistingIds" />
+                        <span>Overwrite existing provider IDs</span>
+                    </label>
+
+                    <label class="checkboxContainer">
+                        <input is="emby-checkbox" type="checkbox" class="chkEnableStartupSweep" />
+                        <span>Run token sweep at startup</span>
+                    </label>
+
+                    <label class="checkboxContainer">
+                        <input is="emby-checkbox" type="checkbox" class="chkRefreshOnStartup" />
+                        <span>Refresh metadata during startup sweep</span>
+                    </label>
+
+                    <button is="emby-button" type="submit" class="raised button-submit block">
+                        <span>Save</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="verticalSection">
+                <h2>Token Sweep</h2>
+                <p>Scans movie and series parent folders for Plex-style tokens such as {tmdb-12345}, {tvdb-12345}, and {imdb-tt1234567}.</p>
+
+                <div class="paperList" style="padding:1em;margin-bottom:1em;">
+                    <p><b>Normal sweep</b></p>
+                    <p>Injects missing IDs and refreshes only tokened items that have not already completed a PlexDirectorySupport refresh for the same token set.</p>
+                    <button is="emby-button" type="button" class="raised button-submit block btnPlexDirectorySupportNormal">
+                        <span>Run Normal Sweep</span>
+                    </button>
+                </div>
+
+                <div class="paperList" style="padding:1em;margin-bottom:1em;">
+                    <p><b>Force sweep</b></p>
+                    <p>Refreshes every tokened movie and series parent item, including items already handled before.</p>
+                    <button is="emby-button" type="button" class="raised button-submit block btnPlexDirectorySupportForce">
+                        <span>Run Force Sweep</span>
+                    </button>
+                </div>
+
+                <p class="plexDirectorySupportStatus"></p>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function () {
+            function setStatus(page, text) {
+                page.querySelector('.plexDirectorySupportStatus').textContent = text || '';
+            }
+
+            function formatResult(result) {
+                return 'Scanned ' + result.scanned
+                    + ', tokened ' + result.tokened
+                    + ', injected ' + result.injected
+                    + ', refreshed ' + result.refreshed
+                    + ', skipped ' + result.skipped
+                    + ', failed ' + result.failed + '.';
+            }
+
+            var pluginId = 'd7a3f1c2-4b5e-6d7f-8e9a-0b1c2d3e4f50';
+
+            async function loadConfig(page) {
+                var config = await ApiClient.getPluginConfiguration(pluginId);
+                page.querySelector('.chkOverwriteExistingIds').checked = !!config.OverwriteExistingIds;
+                page.querySelector('.chkEnableStartupSweep').checked = config.EnableStartupSweep !== false;
+                page.querySelector('.chkRefreshOnStartup').checked = !!config.RefreshOnStartup;
+            }
+
+            async function saveConfig(page) {
+                var config = await ApiClient.getPluginConfiguration(pluginId);
+                config.OverwriteExistingIds = page.querySelector('.chkOverwriteExistingIds').checked;
+                config.EnableStartupSweep = page.querySelector('.chkEnableStartupSweep').checked;
+                config.RefreshOnStartup = page.querySelector('.chkRefreshOnStartup').checked;
+                await ApiClient.updatePluginConfiguration(pluginId, config);
+            }
+
+            async function runSweep(page, forceRefresh) {
+                setStatus(page, forceRefresh ? 'Running force sweep...' : 'Running normal sweep...');
+
+                try {
+                    var result = await ApiClient.ajax({
+                        type: 'POST',
+                        url: ApiClient.getUrl('PlexDirectorySupport/Sweep', {
+                            forceRefresh: forceRefresh
+                        }),
+                        dataType: 'json'
+                    });
+
+                    setStatus(page, formatResult(result));
+                } catch (err) {
+                    setStatus(page, 'Sweep failed. Check the Jellyfin server log for details.');
+                }
+            }
+
+            function initPage() {
+                var page = this;
+
+                loadConfig(page).catch(function () {
+                    setStatus(page, 'Failed to load settings.');
+                });
+
+                page.querySelector('.plexDirectorySupportConfigForm').onsubmit = function (e) {
+                    e.preventDefault();
+
+                    saveConfig(page).then(function () {
+                        setStatus(page, 'Settings saved.');
+                    }).catch(function () {
+                        setStatus(page, 'Failed to save settings.');
+                    });
+                };
+
+                page.querySelector('.btnPlexDirectorySupportNormal').onclick = function () {
+                    runSweep(page, false);
+                };
+
+                page.querySelector('.btnPlexDirectorySupportForce').onclick = function () {
+                    runSweep(page, true);
+                };
+            }
+
+            document.querySelector('#plexDirectorySupportConfigPage').addEventListener('pageshow', initPage);
+            document.querySelector('#plexDirectorySupportConfigPage').addEventListener('viewshow', initPage);
+        })();
+    </script>
+</div>
